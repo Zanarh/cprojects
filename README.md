@@ -1,5 +1,7 @@
-# cprojects
+# C Programming Projects
 
-# Compile with
-# gcc ntest.c -lncurses -o ntest
+
+# Pseudo-random walk display
+Compile with
+gcc ntest.c -lncurses -o ntest
 
