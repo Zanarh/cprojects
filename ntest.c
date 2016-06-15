@@ -6,17 +6,12 @@
 #include <stdlib.h>
 // #include <gsl/gsl_rng.h>
 
-#define DELAY 30000
+#define DELAY 30000 // refresh
 #define MAXX 1000
-// int j = 0;
-// int tx, ty;
-// getmaxyx(stdscr, tx, ty);
-// WINDOW *field = newwin(max_y, max_x, 0, 0); 
+#define ever (;;)
 
-// 	int j = ty/2; 
-
-int j = 0;
-int possy[MAXX];
+int y_increment = 0;
+int y_position[MAXX];
 
 void init_graph(WINDOW *screen);
 void draw_graph(WINDOW *screen);
@@ -40,48 +35,24 @@ void draw_borders(WINDOW *screen) {
 	}
 }
 
-// int max_y = 0, max_x = 0;
-
-
-
-void draw_x(WINDOW *screen, int pos_x, int pos_y, int max_x, int max_y) {
-	// static int x = max_x/2;
-	// static int y = max_y/2;
-	pos_x = max_x/2;
-	pos_y = max_y/2;
-	mvwprintw(screen, pos_y, pos_x, "o");
-}
-
-
 int main(int argc, char *argv[]) {
-	// gsl_rng * r;
-
-	// int num = gsl_rng_uniform(r);
-
-	int x = 3, y = 4;
-
-	int max_y = 1, max_x = 1;
-
+	int x = 3, y = 4; // arbitrary starting positions
+	int max_y, max_x;
 	int new_x, new_y; 
-
-	int pos_x = 5, pos_y = 5;
 
 	int next_x = 0;
 	int direction = 1;
 
 	int len;
-	char str[50];
-
-	strcpy(str, "I'm moving!");
-	len = strlen(str);
+	char scroll_str[50];
 
 	initscr();
 	noecho();
 	curs_set(FALSE);
 
 	WINDOW *field = newwin(max_y, max_x, 0, 0); 
-	getmaxyx(stdscr, pos_y, pos_x);
-	j = pos_y/2;
+	getmaxyx(stdscr, max_y, max_x);
+	y_increment = max_y/2;
 
 	wclear(field);
 	draw_borders(field); 
@@ -94,16 +65,16 @@ int main(int argc, char *argv[]) {
 		draw_borders(field); 
 	} 
 	mvwprintw(field, 1, 2, "Pseudo-random walk");
-	mvwprintw(field, 3, x, str);
-	// draw_x(field, pos_x, pos_y, max_x, max_y);
+	strcpy(scroll_str, "turk sux massive dongers!!1!");
+	len = strlen(scroll_str);
+	mvwprintw(field, 3, x, scroll_str);
 
 	init_graph(field);
 
 	wrefresh(field);	
-
 	usleep(DELAY);
 
-	while(1) {
+	for ever {
 		wclear(field);
 		draw_borders(field); 
 		getmaxyx(stdscr, new_y, new_x); 
@@ -115,17 +86,15 @@ int main(int argc, char *argv[]) {
 			draw_borders(field); 
 		} 
 		mvwprintw(field, 1, 2, "Pseudo-random walk");
-		mvwprintw(field, 3, x, str);
-		// draw_x(field, pos_x, pos_y, max_x, max_y);
+		mvwprintw(field, 3, x, scroll_str);
 
 		draw_graph(field);
 
 		wrefresh(field);	
-
 		usleep(DELAY);
 
+		// horizontal increment of scrolling text 
 		next_x = x + direction;
-
 		if (next_x >= (max_x - len - 1) || next_x < 2) {
 			direction *= -1;
 		} else {
@@ -141,47 +110,48 @@ int main(int argc, char *argv[]) {
 void init_graph(WINDOW *screen) {
 	int max_x, max_y;
 	getmaxyx(stdscr, max_y, max_x);
+	y_increment = max_y/2;
 
-	// int static j = (int) max_y; 
-	int randy, tempy;
+	// int static y_increment = (int) max_y; 
+	int randy, signy;
 
 	for (int i = 1; i < (max_x - 1); i++) {
 		randy = rand() % 2;
-		tempy = rand() % 2;
-		if (tempy == 0) {
+		signy = rand() % 2;
+		if (signy == 0) {
 			randy *= -1;
 		}
 
-		if (((j + randy) < (max_y - 1)) && (j + randy) > 4) {
-			j += randy;
+		if (((y_increment + randy) < (max_y - 1)) && (y_increment + randy) > 4) {
+			y_increment += randy;
 		}
 
-		possy[i-1] = j;
+		y_position[i-1] = y_increment;
 		
-		mvwprintw(screen, j, i, "o");
+		mvwprintw(screen, y_increment, i, "o");
 	}	
 }
 
 void draw_graph(WINDOW *screen) {
 	int max_x, max_y;
-	int randy, tempy;
+	int randy, signy;
 	getmaxyx(stdscr, max_y, max_x);
 	randy = rand() % 2;
-	tempy = rand() % 2;
-	if (tempy == 0) {
+	signy = rand() % 2;
+	if (signy == 0) {
 		randy *= -1;
 	}
 
 	for (int i = 1; i < (max_x - 1); i++) {
 		if (i == (max_x - 2)) {
-			if (((j + randy) < (max_y - 1)) && (j + randy) > 4) {
-				j += randy;
+			if (((y_increment + randy) < (max_y - 1)) && (y_increment + randy) > 4) {
+				y_increment += randy;
 			}
-			possy[i-1] = j;
+			y_position[i-1] = y_increment;
 		}
 		else {
-			possy[i-1] = possy[i];
+			y_position[i-1] = y_position[i];
 		}
-		mvwprintw(screen, possy[i-1], i, "o");
+		mvwprintw(screen, y_position[i-1], i, "o");
 	}
 }
